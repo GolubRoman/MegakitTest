@@ -37,28 +37,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+//        switching of shadow from action bar
         getSupportActionBar().setElevation(0);
 
         carsFragment = CarsFragment.newInstance();
-        replaceCarsFragment();
+//        replacing CarsFragment on Activity in fragment container
+        replaceCarsFragment(carsFragment);
     }
 
-    private void replaceCarsFragment(){
+    private void replaceCarsFragment(Fragment fragment){
+//        method for managing fragments, replacing it in fragment container
         FragmentTransaction fragmentTransaction =
                 getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_car_list, carsFragment).commit();
+        fragmentTransaction.replace(R.id.fragment_car_list, fragment).commit();
     }
 
     public void addClicked(){
+//        method for getting alert dialog on screen with the interface for adding new items
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.add_dialog, null);
+
+//        initializing inner elements from alert dialog
 
         final EditText nameEdit = ButterKnife.findById(dialogView, R.id.add_name);
         final EditText ownerEdit = ButterKnife.findById(dialogView, R.id.add_owner);
         final ColorPickerView colorEdit = ButterKnife.findById(dialogView, R.id.add_color);
 
         dialogBuilder.setView(dialogView);
+//        managing ok action for alert dialog
         dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -71,19 +78,23 @@ public class MainActivity extends AppCompatActivity {
                     onOkBtnClicked(carName, carOwner, carColor);
                 }
             }
+//            managing cancel action for alert dialog
         }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
+//        showing the alert dialog
         AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
     }
 
     private void onOkBtnClicked(String carName, String carOwner, String carColor){
+//        adding to database some new item
         CarModel carModel = new CarModel(carName, carOwner, carColor);
         DBQueries.addToDatabase(carModel, this);
+//        updating and showing it on screen
         ((CarsFragment)carsFragment).updateDatabase();
     }
 
