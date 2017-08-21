@@ -67,33 +67,39 @@ public class CarsFragment extends Fragment {
     }
 
     private void setCarsRecycler(){
+//        setting up the list of cars models from database
         carModels = DBQueries.getTable(getActivity());
         linearLayoutManager = new LinearLayoutManager(getActivity());
+//        initializing of adapter and its customClickListener
         carsAdapter = new CarsAdapter(getActivity(), carModels, new CustomClickListener() {
             @Override
             public void onLongClick(int position, View view) {
-
+                showPopupMenu(view, carModels.get(position), position);
             }
 
             @Override
             public void onShortClick(int position, View view) {
-
+                showPopupMenu(view, carModels.get(position), position);
             }
         });
         carsRecycler.setAdapter(carsAdapter);
         carsRecycler.setLayoutManager(linearLayoutManager);
+//        checking if cars list empty
         if(carModels.size() > 0) {
             carsRecycler.setVisibility(View.VISIBLE);
             noInfoTextView.setVisibility(View.GONE);
         }
+//        adding scroll listener to recycler view for button add animation
         carsRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 int begPog = addBtn.getScrollY();
                 if (newState == RecyclerView.SCROLL_STATE_DRAGGING){
+//                    if recyclerview is dragged
                     addBtn.animate().translationYBy(500);
                 }else{
+//                    if recyclerview is stopped
                     addBtn.animate().cancel();
                     addBtn.animate().translationY(begPog);
                 }
@@ -101,29 +107,24 @@ public class CarsFragment extends Fragment {
         });
     }
 
-    private void showPopupMenu(){
-        PopupMenu popupMenu = new PopupMenu(getActivity(), v);
-        popupMenu.inflate(R.menu.context_menu);
-
+    private void showPopupMenu(View view, final CarModel carModel, final int position){
+//        method for getting popup menu when clicking on recyclerview item
+        PopupMenu popupMenu = new PopupMenu(getActivity(), view);
+        popupMenu.inflate(R.menu.popup);
+//        setting actions on different choosing cases
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.delete:
-                        firebaseDatabase.getReference().child("users").child(email).child("cart").child(idPath).
-                                removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    moreElements.remove(position);
-                                    adapter.notifyItemRemoved(position);
-                                    adapter.notifyItemRangeChanged(position, moreElements.size());
-                                    orderButton.setVisibility(View.GONE);
-                                } else {
-                                    Toast.makeText(getActivity(), "Cannot delete this element", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+//                        delete item
+                        DBQueries.deleteElementFromDatabase(getActivity(), carModel);
+                        carsAdapter.notifyItemChanged(position);
+                        updateDatabase();
+                        return true;
+                    case R.id.edit:
+//                        edit item
+
                         return true;
                     default:
                         return false;
@@ -134,8 +135,11 @@ public class CarsFragment extends Fragment {
     }
 
     public void updateDatabase(){
+//        method for updating database
+//        getting information from database in cars list
         carModels = DBQueries.getTable(getActivity());
         carsAdapter.setListObjects(carModels);
+//        checking if cars list is empty
         if(carModels.size() >= 0){
             carsRecycler.setVisibility(View.VISIBLE);
             noInfoTextView.setVisibility(View.GONE);
