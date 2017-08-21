@@ -1,7 +1,10 @@
 package com.golub.golubroman.megakittest.Cars;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,10 +16,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.flask.colorpicker.ColorPickerView;
 import com.golub.golubroman.megakittest.Cars.Database.DBQueries;
+import com.golub.golubroman.megakittest.MainActivity;
 import com.golub.golubroman.megakittest.R;
 
 import java.util.ArrayList;
@@ -120,11 +126,12 @@ public class CarsFragment extends Fragment {
 //                        delete item
                         DBQueries.deleteElementFromDatabase(getActivity(), carModel);
                         carsAdapter.notifyItemChanged(position);
+                        carsAdapter.notifyItemRangeChanged(position, carModels.size());
                         updateDatabase();
                         return true;
                     case R.id.edit:
 //                        edit item
-
+                        editClicked(carModel);
                         return true;
                     default:
                         return false;
@@ -140,11 +147,74 @@ public class CarsFragment extends Fragment {
         carModels = DBQueries.getTable(getActivity());
         carsAdapter.setListObjects(carModels);
 //        checking if cars list is empty
-        if(carModels.size() >= 0){
+        if(carModels.size() > 0){
             carsRecycler.setVisibility(View.VISIBLE);
             noInfoTextView.setVisibility(View.GONE);
+        }else if(carModels.size() == 0){
+            carsRecycler.setVisibility(View.GONE);
+            noInfoTextView.setVisibility(View.VISIBLE);
         }
     }
 
+    public void updateWithTheSearch(List<CarModel> carModels){
+//        method for updating recycler view with the data, got from search
+//        getting data from searchView
+        this.carModels = carModels;
+        carsAdapter.setListObjects(carModels);
+//        checking if cars list is empty
+        if(carModels.size() > 0){
+            carsRecycler.setVisibility(View.VISIBLE);
+            noInfoTextView.setVisibility(View.GONE);
+        }else if(carModels.size() == 0){
+            carsRecycler.setVisibility(View.GONE);
+            noInfoTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void editClicked(final CarModel carModel){
+//        method for getting alert dialog on screen with the interface for adding new items
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.add_dialog, null);
+
+//        initializing inner elements from alert dialog
+        final TextView title = ButterKnife.findById(dialogView, R.id.title);
+        final EditText nameEdit = ButterKnife.findById(dialogView, R.id.add_name);
+        final EditText ownerEdit = ButterKnife.findById(dialogView, R.id.add_owner);
+        final ColorPickerView colorEdit = ButterKnife.findById(dialogView, R.id.add_color);
+
+        title.setText("Edit Car");
+        nameEdit.setText(carModel.getCarName());
+        ownerEdit.setText(carModel.getCarOwner());
+
+        dialogBuilder.setView(dialogView);
+//        managing ok action for alert dialog
+        dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String carName = nameEdit.getText().toString();
+                String carOwner = ownerEdit.getText().toString();
+                String carColor = String.format("#%06X", 0xFFFFFF & colorEdit.getSelectedColor());
+                if(carName.trim().equals("") || carOwner.trim().equals("")){
+                    Toast.makeText(getActivity(), "Fill all fields!", Toast.LENGTH_SHORT).show();
+                }else{
+                    carModel.setCarName(carName);
+                    carModel.setCarOwner(carOwner);
+                    carModel.setCarColor(carColor);
+                    DBQueries.changeElementFromDatabase(getActivity(), carModel);
+                    updateDatabase();
+                }
+            }
+//            managing cancel action for alert dialog
+        }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+//        showing the alert dialog
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
 
 }

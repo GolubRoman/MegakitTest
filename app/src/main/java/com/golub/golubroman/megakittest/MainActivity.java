@@ -18,6 +18,9 @@ import com.golub.golubroman.megakittest.Cars.CarModel;
 import com.golub.golubroman.megakittest.Cars.CarsFragment;
 import com.golub.golubroman.megakittest.Cars.Database.DBQueries;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -43,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         carsFragment = CarsFragment.newInstance();
 //        replacing CarsFragment on Activity in fragment container
         replaceCarsFragment(carsFragment);
+        setSearchViewListeners();
+        searchView.setIconifiedByDefault(false);
     }
 
     private void replaceCarsFragment(Fragment fragment){
@@ -96,6 +101,38 @@ public class MainActivity extends AppCompatActivity {
         DBQueries.addToDatabase(carModel, this);
 //        updating and showing it on screen
         ((CarsFragment)carsFragment).updateDatabase();
+    }
+
+    public void setSearchViewListeners(){
+//        setting listener for search view to get search results
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+//                if user clicked button submit
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+//                if user change text in searchview he will get search results
+//                which contain query phrase
+                query = query.toLowerCase();
+                List<CarModel> carModels = DBQueries.getTable(getApplicationContext());
+                List<CarModel> filteredList = new ArrayList<>();
+//                search through the list of recycler view items
+                for(CarModel carmodel : carModels){
+//                    if recycler view item contains query phrase
+                    if(carmodel.getCarName().toLowerCase().contains(query) ||
+                            carmodel.getCarOwner().toLowerCase().contains(query)){
+                        filteredList.add(carmodel);
+                    }
+                }
+//                updating the list to display search results
+                ((CarsFragment)carsFragment).updateWithTheSearch(filteredList);
+                return true;
+            }
+        });
+
     }
 
 }
