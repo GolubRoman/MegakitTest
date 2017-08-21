@@ -23,6 +23,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+//       Creating of table with 3 columns: name, owner, color
         cv = new ContentValues();
 
         db.execSQL("CREATE TABLE " + tableCARS + " ("
@@ -35,6 +36,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//        method for case if the app has updated
         db.execSQL("DROP TABLE IF EXISTS " + tableCARS);
         onCreate(db);
     }

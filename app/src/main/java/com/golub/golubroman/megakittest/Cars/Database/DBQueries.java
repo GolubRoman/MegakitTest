@@ -37,13 +37,16 @@ public class DBQueries{
         String querySQL = "SELECT * FROM " + tableCARS;
         db = dbh.getWritableDatabase();
 
+//        Check for empty base
         Cursor cursor = db.rawQuery(querySQL, null);
         if(!cursor.moveToFirst()) {
             return new ArrayList<>();
         }else{favoritesList.add(fillModel(cursor));}
+//        if we have no elements further
         if(!cursor.moveToNext()) {
             return favoritesList;
         }
+//        adding the element to favoritesList from database with fillModel method
         do{
             favoritesList.add(fillModel(cursor));
         }while (cursor.moveToNext());
@@ -53,6 +56,7 @@ public class DBQueries{
     }
 
     public static CarModel fillModel(Cursor cursor){
+//        initializing of car model
         String carName = cursor.getString(cursor.getColumnIndex(columnCARNAME));
         String carOwner = cursor.getString(cursor.getColumnIndex(columnCAROWNER));
         String carColor = cursor.getString(cursor.getColumnIndex(columnCARCOLOR));
@@ -62,6 +66,7 @@ public class DBQueries{
     }
 
     public static void addToDatabase(CarModel carModel, Context context){
+//        adding to database some object of car model class
         dbh = new DBHelper(context);
         db = dbh.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -73,18 +78,22 @@ public class DBQueries{
         cv.put(columnCARNAME, carName);
         cv.put(columnCAROWNER, carOwner);
         cv.put(columnCARCOLOR, carColor);
+//        inserting of the object to database
         db.insert(tableCARS, null, cv);
         db.close();
     }
 
     public static void deleteElementFromDatabase(Context context, CarModel carModel){
+//        removing element from database
         dbh = new DBHelper(context);
         db = dbh.getWritableDatabase();
+//        searching of the element by id
         db.delete(tableCARS, column_ID + " = ?", new String[]{carModel.getId()});
         db.close();
     }
 
     public static void changeElementFromDatabase(Context context, CarModel carModel){
+//        changing of element by first deleting it and then adding new one
         deleteElementFromDatabase(context, carModel);
         addToDatabase(carModel, context);
         db.close();

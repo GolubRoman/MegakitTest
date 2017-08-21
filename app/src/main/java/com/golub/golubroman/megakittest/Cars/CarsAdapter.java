@@ -40,6 +40,7 @@ public class CarsAdapter extends RecyclerView.Adapter {
         CarViewHolder carViewHolder;
         View view = LayoutInflater.from(context).inflate(R.layout.item_list, parent, false);
         carViewHolder = new CarViewHolder(view);
+//        setting viewholder unrecyclable not to get strange behaviour of viewholder when scrolling
         carViewHolder.setIsRecyclable(false);
         return carViewHolder;
     }
@@ -47,10 +48,12 @@ public class CarsAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final CarViewHolder carViewHolder = (CarViewHolder)holder;
+//        changing of color of shape from car_color.xml
         ((GradientDrawable)carViewHolder.color.getDrawable()).setColor(
                         Color.parseColor(carModels.get(position).getCarColor()));
         carViewHolder.carName.setText(carModels.get(position).getCarName());
         carViewHolder.carOwner.setText(carModels.get(position).getCarOwner());
+//        using of interface methods of customClickListener interface to listen long clicks
         carViewHolder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -58,9 +61,18 @@ public class CarsAdapter extends RecyclerView.Adapter {
                 return true;
             }
         });
+//        using of interface methods of customClickListener interface to listen short clicks
+
+        carViewHolder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                customClickListener.onShortClick(position, carViewHolder.view);
+            }
+        });
     }
 
     public void setListObjects(List<CarModel> carModels){
+//        updating of adapter with inner method setListObjects with objects from database
         if(this.carModels.size()>0)
             this.carModels.clear();
         this.carModels = carModels;
@@ -73,6 +85,7 @@ public class CarsAdapter extends RecyclerView.Adapter {
     }
 
     class CarViewHolder extends RecyclerView.ViewHolder{
+//        Using of ViewHolder pattern to work with specific element of the recyclerview
 
         @BindView(R.id.color) ImageView color;
         @BindView(R.id.car_name) TextView carName;
