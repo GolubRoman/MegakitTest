@@ -46,6 +46,7 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
     private CarsAdapter carsAdapter;
     private LinearLayoutManager linearLayoutManager;
     private List<CarModel> carModels;
+    private List<OwnerModel> ownerModels;
     private FloatingActionButton addBtn;
 
 
@@ -83,18 +84,19 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
 
     private void setCarsRecycler(){
 //        setting up the list of cars models from database
-        carModels = presenter.getTableDatabase();
+        carModels = presenter.getCarDatabase();
+        ownerModels = presenter.getOwnerDatabase();
         linearLayoutManager = new LinearLayoutManager(getActivity());
 //        initializing of adapter and its customClickListener
-        carsAdapter = new CarsAdapter(getActivity(), carModels, new CustomClickListener() {
+        carsAdapter = new CarsAdapter(getActivity(), carModels, ownerModels, new CustomClickListener() {
             @Override
             public void onLongClick(int position, View view) {
-                showPopupMenu(view, carModels.get(position), position);
+                showPopupMenu(view, carModels.get(position), ownerModels.get(position), position);
             }
 
             @Override
             public void onShortClick(int position, View view) {
-                showPopupMenu(view, carModels.get(position), position);
+                showPopupMenu(view, carModels.get(position), ownerModels.get(position), position);
             }
         });
         carsRecycler.setAdapter(carsAdapter);
@@ -122,7 +124,8 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
         });
     }
 
-    private void showPopupMenu(View view, final CarModel carModel, final int position){
+    private void showPopupMenu(View view, final CarModel carModel, final OwnerModel ownerModel,
+                               final int position){
 //        method for getting popup menu when clicking on recyclerview item
         PopupMenu popupMenu = new PopupMenu(getActivity(), view);
         popupMenu.inflate(R.menu.popup);
@@ -133,14 +136,14 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
                 switch (item.getItemId()) {
                     case R.id.delete:
 //                        delete item
-                        presenter.onDeletePopupClicked(carModel);
+                        presenter.onDeletePopupClicked(carModel, ownerModel);
                         carsAdapter.notifyItemChanged(position);
                         carsAdapter.notifyItemRangeChanged(position, carModels.size());
                         updateDatabase();
                         return true;
                     case R.id.edit:
 //                        edit item
-                        editClicked(carModel);
+                        editClicked(carModel, ownerModel);
                         return true;
                     default:
                         return false;
@@ -156,13 +159,14 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
                 Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_CODE);
     }
 
-    public void updateWithTheSearch(List<CarModel> carModels){
+    public void updateWithTheSearch(List<CarModel> carModels, List<OwnerModel> ownerModels){
 //        method for updating recycler view with the data, got from search
 //        getting data from searchView
 
         this.carModels = carModels;
+        this.ownerModels = ownerModels;
 
-        carsAdapter.setListObjects(carModels);
+        carsAdapter.setListObjects(carModels, ownerModels);
 //        checking if cars list is empty
         if(carModels.size() > 0){
             carsRecycler.setVisibility(View.VISIBLE);
@@ -173,7 +177,7 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
         }
     }
 
-    public void editClicked(final CarModel carModel){
+    public void editClicked(final CarModel carModel, final OwnerModel ownerModel){
 //        method for getting alert dialog on screen with the interface for adding new items
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -195,7 +199,7 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
 
         title.setText("Edit Car");
         nameEdit.setText(carModel.getCarName());
-        ownerEdit.setText(carModel.getCarOwner());
+        ownerEdit.setText(ownerModel.getOwnerName());
 
         this.carModel = carModel;
 
@@ -210,9 +214,8 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
                     Toast.makeText(getActivity(), "Fill all fields!", Toast.LENGTH_SHORT).show();
                 }else{
                     carModel.setCarName(carName);
-                    carModel.setCarOwner(carOwner);
-                    carModel.setCarColor("null");
-                    presenter.onOkDialogClicked(carModel);
+                    ownerModel.setOwnerName(carOwner);
+                    presenter.onOkDialogClicked(carModel, ownerModel);
                     updateDatabase();
 
                 }
@@ -232,9 +235,10 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
     }
 
     public void updateDatabase(){
-        carModels = presenter.updateDatabase();
+        carModels = presenter.getCarDatabase();
+        ownerModels = presenter.getOwnerDatabase();
 //        getting information from database in cars list
-        carsAdapter.setListObjects(carModels);
+        carsAdapter.setListObjects(carModels, ownerModels);
 //        checking if cars list is empty
         if(carModels.size() > 0){
             carsRecycler.setVisibility(View.VISIBLE);

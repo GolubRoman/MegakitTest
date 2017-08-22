@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.golub.golubroman.megakittest.Cars.CarModel;
 import com.golub.golubroman.megakittest.Cars.Database.DBQueries;
+import com.golub.golubroman.megakittest.Cars.OwnerModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,25 +24,30 @@ public class MainPresenter implements MainMVP.PtVInterface{
     }
 
     @Override
-    public void addToDatabase(CarModel carModel) {
+    public void addToDatabase(CarModel carModel, OwnerModel ownerModel) {
 //      adding car model to database
-        DBQueries.addToDatabase(carModel, context);
+        String id = DBQueries.addCarToDatabase(carModel, context);
+        DBQueries.addOwnerToDatabase(ownerModel, id, context);
     }
 
     @Override
     public void runSearch(String query) {
-        List<CarModel> carModels = DBQueries.getTable(context);
-        List<CarModel> filteredList = new ArrayList<>();
+        List<CarModel> carModels = DBQueries.getCarTable(context);
+        List<OwnerModel> ownerModels = DBQueries.getOwnerTable(context);
+
+        List<CarModel> filteredCarList = new ArrayList<>();
+        List<OwnerModel> filteredOwnerList = new ArrayList<>();
 //      search through the list of recycler view items
         query = query.toLowerCase();
-        for(CarModel carmodel : carModels){
+        for(int i = 0; i < carModels.size(); i++){
 //          if recycler view item contains query phrase
-            if(carmodel.getCarName().toLowerCase().contains(query) ||
-                    carmodel.getCarOwner().toLowerCase().contains(query)){
-                filteredList.add(carmodel);
+            if(carModels.get(i).getCarName().toLowerCase().contains(query) ||
+                    ownerModels.get(i).getOwnerName().toLowerCase().contains(query)){
+                filteredCarList.add(carModels.get(i));
+                filteredOwnerList.add(ownerModels.get(i));
             }
         }
 //      running interface method for displaying search results
-        view.displaySearchResults(filteredList);
+        view.displaySearchResults(filteredCarList, filteredOwnerList);
     }
 }

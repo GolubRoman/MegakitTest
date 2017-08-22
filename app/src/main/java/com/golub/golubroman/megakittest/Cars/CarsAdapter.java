@@ -1,8 +1,6 @@
 package com.golub.golubroman.megakittest.Cars;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,11 +25,14 @@ public class CarsAdapter extends RecyclerView.Adapter {
 
     private Context context;
     private List<CarModel> carModels;
+    private List<OwnerModel> ownerModels;
     private CustomClickListener customClickListener;
 
-    public CarsAdapter(Context context, List<CarModel> carModels, CustomClickListener customClickListener){
+    public CarsAdapter(Context context, List<CarModel> carModels, List<OwnerModel> ownerModels,
+                       CustomClickListener customClickListener){
         this.context = context;
         this.carModels = carModels;
+        this.ownerModels = ownerModels;
         this.customClickListener = customClickListener;
     }
 
@@ -49,7 +50,7 @@ public class CarsAdapter extends RecyclerView.Adapter {
         final CarViewHolder carViewHolder = (CarViewHolder)holder;
         carViewHolder.setImage(holder.getAdapterPosition());
         carViewHolder.carName.setText(carModels.get(holder.getAdapterPosition()).getCarName());
-        carViewHolder.carOwner.setText(carModels.get(holder.getAdapterPosition()).getCarOwner());
+        carViewHolder.carOwner.setText(ownerModels.get(holder.getAdapterPosition()).getOwnerName());
 //        using of interface methods of customClickListener interface to listen long clicks
         carViewHolder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -74,11 +75,14 @@ public class CarsAdapter extends RecyclerView.Adapter {
     }
 
 
-    public void setListObjects(List<CarModel> carModels){
+    public void setListObjects(List<CarModel> carModels, List<OwnerModel> ownerModels){
 //        updating of adapter with inner method setListObjects with objects from database
-        if(this.carModels.size()>0)
+        if(this.carModels.size()>0 && this.ownerModels.size()>0) {
             this.carModels.clear();
+            this.ownerModels.clear();
+        }
         this.carModels = carModels;
+        this.ownerModels = ownerModels;
         this.notifyDataSetChanged();
     }
 
