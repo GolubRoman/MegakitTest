@@ -3,6 +3,7 @@ package com.golub.golubroman.megakittest.Cars;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,17 +41,15 @@ public class CarsAdapter extends RecyclerView.Adapter {
         View view = LayoutInflater.from(context).inflate(R.layout.item_list, parent, false);
         carViewHolder = new CarViewHolder(view);
 //        setting viewholder unrecyclable not to get strange behaviour of viewholder when scrolling
-        carViewHolder.setIsRecyclable(false);
         return carViewHolder;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final CarViewHolder carViewHolder = (CarViewHolder)holder;
-//        changing of color of shape from car_color.xml
-        carViewHolder.setImage(position);
-        carViewHolder.carName.setText(carModels.get(position).getCarName());
-        carViewHolder.carOwner.setText(carModels.get(position).getCarOwner());
+        carViewHolder.setImage(holder.getAdapterPosition());
+        carViewHolder.carName.setText(carModels.get(holder.getAdapterPosition()).getCarName());
+        carViewHolder.carOwner.setText(carModels.get(holder.getAdapterPosition()).getCarOwner());
 //        using of interface methods of customClickListener interface to listen long clicks
         carViewHolder.view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -69,12 +68,18 @@ public class CarsAdapter extends RecyclerView.Adapter {
         });
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+
     public void setListObjects(List<CarModel> carModels){
 //        updating of adapter with inner method setListObjects with objects from database
         if(this.carModels.size()>0)
             this.carModels.clear();
         this.carModels = carModels;
-        notifyDataSetChanged();
+        this.notifyDataSetChanged();
     }
 
     @Override
@@ -85,20 +90,19 @@ public class CarsAdapter extends RecyclerView.Adapter {
     class CarViewHolder extends RecyclerView.ViewHolder{
 //        Using of ViewHolder pattern to work with specific element of the recyclerview
 //        Using Butterknife for binding data
+        @BindView(R.id.list_item) CardView view;
         @BindView(R.id.color) ImageView color;
         @BindView(R.id.car_name) TextView carName;
         @BindView(R.id.car_owner) TextView carOwner;
 
-        private View view;
-
         public CarViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-            view = itemView;
         }
 
         public void setImage(int position){
 //            method for setting Photo if it exists and Color if it doesn`t exist
+//        changing of color of shape from car_color.xml
             if(!carModels.get(position).getCarPhoto().equals("null")) {
 //                if photo exists
 //                using Glide library for rapid displaying of photo
@@ -107,10 +111,9 @@ public class CarsAdapter extends RecyclerView.Adapter {
                         .into(color);
             }else{
 //                if photo doesn`t exists
-                color.setImageDrawable(context.getResources().getDrawable(R.drawable.car_color));
-//                changing of color of rectangle on recycler view item
-                ((GradientDrawable) color.getDrawable()).setColor(
-                        Color.parseColor(carModels.get(position).getCarColor()));
+                Glide.with(context)
+                        .load("android.resource://com.golub.golubroman.megakittest/" + R.drawable.ic_car)
+                        .into(color);
             }
         }
     }

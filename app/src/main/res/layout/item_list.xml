@@ -6,6 +6,7 @@
     android:padding="8dp"
     android:layout_margin="8dp"
     android:focusable="true"
+    android:id="@+id/list_item"
     android:foreground="?android:attr/selectableItemBackground">
 
     <RelativeLayout

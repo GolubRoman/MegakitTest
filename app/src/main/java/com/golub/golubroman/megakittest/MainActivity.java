@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
     private MainMVP.PtVInterface presenter;
     private ImageView dialogPhoto;
     private String carPhoto;
+    private boolean photoNeeded;
     private Fragment carsFragment;
 
 
@@ -95,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
 //            setting resources for photo binding
             if(data != null && data.getData() != null){
                 dialogPhoto.setImageURI(data.getData());
+                photoNeeded = true;
                 carPhoto = data.getData().toString();
             }else {
 //             displaying message if photo uploading failed
@@ -120,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
 
         final EditText nameEdit = ButterKnife.findById(dialogView, R.id.add_name);
         final EditText ownerEdit = ButterKnife.findById(dialogView, R.id.add_owner);
-        final ColorPickerView colorEdit = ButterKnife.findById(dialogView, R.id.add_color);
         final Button photoEdit = ButterKnife.findById(dialogView, R.id.add_photo);
         final ImageView imageView = ButterKnife.findById(dialogView, R.id.photo);
 
@@ -140,11 +141,10 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
             public void onClick(DialogInterface dialog, int which) {
                 String carName = nameEdit.getText().toString();
                 String carOwner = ownerEdit.getText().toString();
-                String carColor = String.format("#%06X", 0xFFFFFF & colorEdit.getSelectedColor());
                 if(carName.trim().equals("") || carOwner.trim().equals("")){
                     Toast.makeText(MainActivity.this, "Fill all fields!", Toast.LENGTH_SHORT).show();
                 }else{
-                    onOkBtnClicked(carName, carOwner, carColor);
+                    onOkBtnClicked(carName, carOwner, "null");
                 }
             }
 //            managing cancel action for alert dialog
@@ -169,7 +169,12 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
     private void onOkBtnClicked(String carName, String carOwner, String carColor){
 //        adding to database some new item
         CarModel carModel = new CarModel(carName, carOwner, carColor);
-        carModel.setCarPhoto(carPhoto);
+        if(photoNeeded) {
+            carModel.setCarPhoto(carPhoto);
+        }else{
+            carModel.setCarPhoto("null");
+        }
+        photoNeeded = false;
         presenter.addToDatabase(carModel);
 //        updating and showing it on screen
         ((CarsFragment)carsFragment).updateDatabase();
@@ -191,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
                 return true;
             }
         });
+
 
     }
 

@@ -159,7 +159,9 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
     public void updateWithTheSearch(List<CarModel> carModels){
 //        method for updating recycler view with the data, got from search
 //        getting data from searchView
+
         this.carModels = carModels;
+
         carsAdapter.setListObjects(carModels);
 //        checking if cars list is empty
         if(carModels.size() > 0){
@@ -181,7 +183,6 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
         final TextView title = ButterKnife.findById(dialogView, R.id.title);
         final EditText nameEdit = ButterKnife.findById(dialogView, R.id.add_name);
         final EditText ownerEdit = ButterKnife.findById(dialogView, R.id.add_owner);
-        final ColorPickerView colorEdit = ButterKnife.findById(dialogView, R.id.add_color);
         final Button photoEdit = ButterKnife.findById(dialogView, R.id.add_photo);
         final ImageView imageView = ButterKnife.findById(dialogView, R.id.photo);
 
@@ -205,13 +206,12 @@ public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
             public void onClick(DialogInterface dialog, int which) {
                 String carName = nameEdit.getText().toString();
                 String carOwner = ownerEdit.getText().toString();
-                String carColor = String.format("#%06X", 0xFFFFFF & colorEdit.getSelectedColor());
                 if(carName.trim().equals("") || carOwner.trim().equals("")){
                     Toast.makeText(getActivity(), "Fill all fields!", Toast.LENGTH_SHORT).show();
                 }else{
                     carModel.setCarName(carName);
                     carModel.setCarOwner(carOwner);
-                    carModel.setCarColor(carColor);
+                    carModel.setCarColor("null");
                     presenter.onOkDialogClicked(carModel);
                     updateDatabase();
 
