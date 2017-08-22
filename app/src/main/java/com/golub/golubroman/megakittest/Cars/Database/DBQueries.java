@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Created by roman on 21.08.17.
+ */
 
 public class DBQueries{
 
@@ -21,6 +24,7 @@ public class DBQueries{
     final static String columnCARNAME = "carname";
     final static String columnCAROWNER = "carowner";
     final static String columnCARCOLOR = "carcolor";
+    final static String columnCARPHOTO = "carphoto";
 
 
     private Context context;
@@ -60,9 +64,13 @@ public class DBQueries{
         String carName = cursor.getString(cursor.getColumnIndex(columnCARNAME));
         String carOwner = cursor.getString(cursor.getColumnIndex(columnCAROWNER));
         String carColor = cursor.getString(cursor.getColumnIndex(columnCARCOLOR));
+        String carPhoto = cursor.getString(cursor.getColumnIndex(columnCARPHOTO));
         String id = cursor.getString(cursor.getColumnIndex(column_ID));
+
+        CarModel carModel = new CarModel(id, carName, carOwner, carColor);
+        carModel.setCarPhoto(carPhoto);
         carsCnt++;
-        return new CarModel(id, carName, carOwner, carColor);
+        return carModel;
     }
 
     public static void addToDatabase(CarModel carModel, Context context){
@@ -73,11 +81,15 @@ public class DBQueries{
         String carName = carModel.getCarName();
         String carOwner = carModel.getCarOwner();
         String carColor = carModel.getCarColor();
+        String carPhoto = carModel.getCarPhoto();
+        if(carPhoto == null) carPhoto = "null";
+
         String id = new BigInteger(50, new SecureRandom()).toString();
         cv.put(column_ID, id);
         cv.put(columnCARNAME, carName);
         cv.put(columnCAROWNER, carOwner);
         cv.put(columnCARCOLOR, carColor);
+        cv.put(columnCARPHOTO, carPhoto);
 //        inserting of the object to database
         db.insert(tableCARS, null, cv);
         db.close();

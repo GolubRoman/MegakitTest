@@ -1,14 +1,12 @@
 package com.golub.golubroman.megakittest.Cars;
 
-import java.math.BigInteger;
-
 /**
  * Created by roman on 21.08.17.
  */
 
 public class CarModel {
 
-    private String carName, carOwner, carColor;
+    private String carName, carOwner, carColor, carPhoto;
     private String id;
 
     public CarModel(String carName, String carOwner, String carColor){
@@ -54,5 +52,13 @@ public class CarModel {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getCarPhoto() {
+        return carPhoto;
+    }
+
+    public void setCarPhoto(String carPhoto) {
+        this.carPhoto = carPhoto;
     }
 }

@@ -1,14 +1,14 @@
 package com.golub.golubroman.megakittest.Cars;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -16,13 +16,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.flask.colorpicker.ColorPickerView;
-import com.golub.golubroman.megakittest.Cars.Database.DBQueries;
-import com.golub.golubroman.megakittest.MainActivity;
 import com.golub.golubroman.megakittest.R;
 
 import java.util.ArrayList;
@@ -35,15 +35,23 @@ import butterknife.ButterKnife;
  * Created by roman on 21.08.17.
  */
 
-public class CarsFragment extends Fragment {
+public class CarsFragment extends Fragment implements CarsMVP.VtPInterface{
 
     @BindView(R.id.recycler) RecyclerView carsRecycler;
     @BindView(R.id.no_info) TextView noInfoTextView;
 
+    private final int STORAGE_CODE = 999;
+
+    private CarsMVP.PtVInterface presenter;
     private CarsAdapter carsAdapter;
     private LinearLayoutManager linearLayoutManager;
     private List<CarModel> carModels;
     private FloatingActionButton addBtn;
+
+
+    public ImageView dialogPhoto;
+    public CarModel carModel;
+
 
     public static CarsFragment newInstance() {
         
@@ -65,8 +73,9 @@ public class CarsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_car_list, container, false);
         ButterKnife.bind(this, view);
-        addBtn = ButterKnife.findById(getActivity(), R.id.add_btn);
+        presenter = new CarsPresenter(this);
 
+        addBtn = ButterKnife.findById(getActivity(), R.id.add_btn);
         carModels = new ArrayList<>();
         setCarsRecycler();
         return view;
@@ -74,7 +83,7 @@ public class CarsFragment extends Fragment {
 
     private void setCarsRecycler(){
 //        setting up the list of cars models from database
-        carModels = DBQueries.getTable(getActivity());
+        carModels = presenter.getTableDatabase();
         linearLayoutManager = new LinearLayoutManager(getActivity());
 //        initializing of adapter and its customClickListener
         carsAdapter = new CarsAdapter(getActivity(), carModels, new CustomClickListener() {
@@ -124,7 +133,7 @@ public class CarsFragment extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.delete:
 //                        delete item
-                        DBQueries.deleteElementFromDatabase(getActivity(), carModel);
+                        presenter.onDeletePopupClicked(carModel);
                         carsAdapter.notifyItemChanged(position);
                         carsAdapter.notifyItemRangeChanged(position, carModels.size());
                         updateDatabase();
@@ -141,19 +150,10 @@ public class CarsFragment extends Fragment {
         popupMenu.show();
     }
 
-    public void updateDatabase(){
-//        method for updating database
-//        getting information from database in cars list
-        carModels = DBQueries.getTable(getActivity());
-        carsAdapter.setListObjects(carModels);
-//        checking if cars list is empty
-        if(carModels.size() > 0){
-            carsRecycler.setVisibility(View.VISIBLE);
-            noInfoTextView.setVisibility(View.GONE);
-        }else if(carModels.size() == 0){
-            carsRecycler.setVisibility(View.GONE);
-            noInfoTextView.setVisibility(View.VISIBLE);
-        }
+    private void requestStorage(){
+        ActivityCompat.requestPermissions(getActivity(),
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_CODE);
     }
 
     public void updateWithTheSearch(List<CarModel> carModels){
@@ -173,19 +173,30 @@ public class CarsFragment extends Fragment {
 
     public void editClicked(final CarModel carModel){
 //        method for getting alert dialog on screen with the interface for adding new items
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.add_dialog, null);
+        final View dialogView = inflater.inflate(R.layout.add_dialog, null);
 
 //        initializing inner elements from alert dialog
         final TextView title = ButterKnife.findById(dialogView, R.id.title);
         final EditText nameEdit = ButterKnife.findById(dialogView, R.id.add_name);
         final EditText ownerEdit = ButterKnife.findById(dialogView, R.id.add_owner);
         final ColorPickerView colorEdit = ButterKnife.findById(dialogView, R.id.add_color);
+        final Button photoEdit = ButterKnife.findById(dialogView, R.id.add_photo);
+        final ImageView imageView = ButterKnife.findById(dialogView, R.id.photo);
+
+        photoEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestStorage();
+            }
+        });
 
         title.setText("Edit Car");
         nameEdit.setText(carModel.getCarName());
         ownerEdit.setText(carModel.getCarOwner());
+
+        this.carModel = carModel;
 
         dialogBuilder.setView(dialogView);
 //        managing ok action for alert dialog
@@ -201,8 +212,9 @@ public class CarsFragment extends Fragment {
                     carModel.setCarName(carName);
                     carModel.setCarOwner(carOwner);
                     carModel.setCarColor(carColor);
-                    DBQueries.changeElementFromDatabase(getActivity(), carModel);
+                    presenter.onOkDialogClicked(carModel);
                     updateDatabase();
+
                 }
             }
 //            managing cancel action for alert dialog
@@ -215,6 +227,21 @@ public class CarsFragment extends Fragment {
 //        showing the alert dialog
         AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
+
+        dialogPhoto = imageView;
     }
 
+    public void updateDatabase(){
+        carModels = presenter.updateDatabase();
+//        getting information from database in cars list
+        carsAdapter.setListObjects(carModels);
+//        checking if cars list is empty
+        if(carModels.size() > 0){
+            carsRecycler.setVisibility(View.VISIBLE);
+            noInfoTextView.setVisibility(View.GONE);
+        }else if(carModels.size() == 0){
+            carsRecycler.setVisibility(View.GONE);
+            noInfoTextView.setVisibility(View.VISIBLE);
+        }
+    }
 }

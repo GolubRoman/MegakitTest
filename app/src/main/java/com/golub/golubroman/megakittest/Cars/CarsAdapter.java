@@ -2,9 +2,7 @@ package com.golub.golubroman.megakittest.Cars;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.golub.golubroman.megakittest.R;
 
 import java.util.List;
@@ -49,8 +48,7 @@ public class CarsAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final CarViewHolder carViewHolder = (CarViewHolder)holder;
 //        changing of color of shape from car_color.xml
-        ((GradientDrawable)carViewHolder.color.getDrawable()).setColor(
-                        Color.parseColor(carModels.get(position).getCarColor()));
+        carViewHolder.setImage(position);
         carViewHolder.carName.setText(carModels.get(position).getCarName());
         carViewHolder.carOwner.setText(carModels.get(position).getCarOwner());
 //        using of interface methods of customClickListener interface to listen long clicks
@@ -86,7 +84,7 @@ public class CarsAdapter extends RecyclerView.Adapter {
 
     class CarViewHolder extends RecyclerView.ViewHolder{
 //        Using of ViewHolder pattern to work with specific element of the recyclerview
-
+//        Using Butterknife for binding data
         @BindView(R.id.color) ImageView color;
         @BindView(R.id.car_name) TextView carName;
         @BindView(R.id.car_owner) TextView carOwner;
@@ -97,6 +95,23 @@ public class CarsAdapter extends RecyclerView.Adapter {
             super(itemView);
             ButterKnife.bind(this, itemView);
             view = itemView;
+        }
+
+        public void setImage(int position){
+//            method for setting Photo if it exists and Color if it doesn`t exist
+            if(!carModels.get(position).getCarPhoto().equals("null")) {
+//                if photo exists
+//                using Glide library for rapid displaying of photo
+                Glide.with(context)
+                        .load(carModels.get(position).getCarPhoto())
+                        .into(color);
+            }else{
+//                if photo doesn`t exists
+                color.setImageDrawable(context.getResources().getDrawable(R.drawable.car_color));
+//                changing of color of rectangle on recycler view item
+                ((GradientDrawable) color.getDrawable()).setColor(
+                        Color.parseColor(carModels.get(position).getCarColor()));
+            }
         }
     }
 }
