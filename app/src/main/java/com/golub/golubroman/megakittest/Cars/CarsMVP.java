@@ -13,9 +13,9 @@ public interface CarsMVP {
     }
 
     interface PtVInterface{
-        void onOkDialogClicked(CarModel carModel);
-        void onDeletePopupClicked(CarModel carModel);
-        List<CarModel> getTableDatabase();
-        List<CarModel> updateDatabase();
+        void onOkDialogClicked(CarModel carModel, OwnerModel ownerModel);
+        void onDeletePopupClicked(CarModel carModel, OwnerModel ownerModel);
+        List<CarModel> getCarDatabase();
+        List<OwnerModel> getOwnerDatabase();
     }
 }

@@ -6,20 +6,12 @@ package com.golub.golubroman.megakittest.Cars;
 
 public class CarModel {
 
-    private String carName, carOwner, carColor, carPhoto;
+    private String carName, carPhoto;
     private String id;
 
-    public CarModel(String carName, String carOwner, String carColor){
-        this.carName = carName;
-        this.carOwner = carOwner;
-        this.carColor = carColor;
-    }
 
-    public CarModel(String id, String carName, String carOwner, String carColor){
-        this.id = id;
+    public CarModel(String carName){
         this.carName = carName;
-        this.carOwner = carOwner;
-        this.carColor = carColor;
     }
 
     public String getCarName() {
@@ -28,22 +20,6 @@ public class CarModel {
 
     public void setCarName(String carName) {
         this.carName = carName;
-    }
-
-    public String getCarOwner() {
-        return carOwner;
-    }
-
-    public void setCarOwner(String carOwner) {
-        this.carOwner = carOwner;
-    }
-
-    public String getCarColor() {
-        return carColor;
-    }
-
-    public void setCarColor(String carColor) {
-        this.carColor = carColor;
     }
 
     public String getId() {

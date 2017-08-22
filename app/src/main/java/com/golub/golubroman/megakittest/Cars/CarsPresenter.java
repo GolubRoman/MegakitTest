@@ -15,6 +15,8 @@ public class CarsPresenter implements CarsMVP.PtVInterface{
     private Context context;
     private CarsMVP.VtPInterface view;
     private List<CarModel> carModels;
+    private List<OwnerModel> ownerModels;
+
 
     public CarsPresenter(CarsMVP.VtPInterface view){
         this.view = view;
@@ -22,27 +24,28 @@ public class CarsPresenter implements CarsMVP.PtVInterface{
     }
 
     @Override
-    public void onOkDialogClicked(CarModel carModel) {
-        DBQueries.changeElementFromDatabase(context, carModel);
+    public void onOkDialogClicked(CarModel carModel, OwnerModel ownerModel) {
+        DBQueries.changeElementFromDatabase(context, carModel, ownerModel);
     }
 
     @Override
-    public void onDeletePopupClicked(CarModel carModel) {
-        DBQueries.deleteElementFromDatabase(context, carModel);
+    public void onDeletePopupClicked(CarModel carModel, OwnerModel ownerModel) {
+        DBQueries.deleteCarFromDatabase(context, carModel);
+        DBQueries.deleteOwnerFromDatabase(context, ownerModel);
     }
 
     @Override
-    public List<CarModel> getTableDatabase() {
-        carModels = DBQueries.getTable(context);
+    public List<CarModel> getCarDatabase() {
+        carModels = DBQueries.getCarTable(context);
         return carModels;
     }
 
     @Override
-    public List<CarModel> updateDatabase() {
-//        method for updating database
-        carModels = DBQueries.getTable(context);
-        return carModels;
+    public List<OwnerModel> getOwnerDatabase() {
+        ownerModels = DBQueries.getOwnerTable(context);
+        return ownerModels;
     }
+
 
 
 }

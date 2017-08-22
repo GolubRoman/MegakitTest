@@ -23,6 +23,8 @@ import android.widget.Toast;
 import com.flask.colorpicker.ColorPickerView;
 import com.golub.golubroman.megakittest.Cars.CarModel;
 import com.golub.golubroman.megakittest.Cars.CarsFragment;
+import com.golub.golubroman.megakittest.Cars.OwnerModel;
+
 import java.util.List;
 
 import butterknife.BindView;
@@ -168,14 +170,15 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
 
     private void onOkBtnClicked(String carName, String carOwner, String carColor){
 //        adding to database some new item
-        CarModel carModel = new CarModel(carName, carOwner, carColor);
+        CarModel carModel = new CarModel(carName);
+        OwnerModel ownerModel = new OwnerModel(carOwner);
         if(photoNeeded) {
             carModel.setCarPhoto(carPhoto);
         }else{
             carModel.setCarPhoto("null");
         }
         photoNeeded = false;
-        presenter.addToDatabase(carModel);
+        presenter.addToDatabase(carModel, ownerModel);
 //        updating and showing it on screen
         ((CarsFragment)carsFragment).updateDatabase();
     }
@@ -218,8 +221,8 @@ public class MainActivity extends AppCompatActivity implements MainMVP.VtPInterf
     }
 
     @Override
-    public void displaySearchResults(List<CarModel> carModels) {
+    public void displaySearchResults(List<CarModel> carModels, List<OwnerModel> ownerModels) {
 //      updating the list to display search results
-        ((CarsFragment)carsFragment).updateWithTheSearch(carModels);
+        ((CarsFragment)carsFragment).updateWithTheSearch(carModels, ownerModels);
     }
 }
